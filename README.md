@@ -16,6 +16,12 @@ Usalo cuando el proveedor ya integra la API para otros productos y necesita adap
 
 No impone un flujo único: cada proveedor puede implementar los endpoints que necesite según su arquitectura.
 
+## Disclaimer
+
+- Esta skill resume y organiza la documentación de integración de Cauciones.
+- Ante dudas o casos no cubiertos, validar siempre contra la documentación oficial de A3 y canales de soporte.
+- Este material acelera integraciones, pero no reemplaza la validación funcional/técnica del equipo integrador.
+
 ## Archivo principal
 
 - `SKILL.md`: punto de entrada del skill (scope, reglas, endpoints y referencias).
