@@ -24,6 +24,18 @@ No impone un flujo único: cada proveedor puede implementar los endpoints que ne
 
 Instalar copiando este directorio como skill en tu entorno de agente (Cursor/Claude u otro cliente compatible con skills Markdown).
 
+La **ruta de instalación depende de la convención del cliente** (lista completa: `https://agentskills.io/clients`).
+
+Ejemplos:
+
+```bash
+# Claude Code
+git clone <repo-url> .claude/skills/a3-ai-skill-cauciones
+
+# Otros clientes compatibles con agentskills.io (ej.: Cursor; lista completa en https://agentskills.io/clients)
+git clone <repo-url> .agents/skills/a3-ai-skill-cauciones
+```
+
 Requisito importante:
 
 - el nombre de carpeta del skill debe ser `a3-ai-skill-cauciones`,
@@ -48,13 +60,15 @@ Requisito importante:
 ## Fuente funcional del contenido
 
 - Manual oficial A3 (PrimaryAPI-BO):  
-  [https://apihub.primary.com.ar/assets/docs/PrimaryAPI-BO.pdf](https://apihub.primary.com.ar/assets/docs/PrimaryAPI-BO.pdf)
-- Manual oficial A3, específico de la migración de Cauciones. [https://a3mercados.com.ar/docs/cauciones-api-post-trade-a3/](https://a3mercados.com.ar/docs/cauciones-api-post-trade-a3/)
+[https://apihub.primary.com.ar/assets/docs/PrimaryAPI-BO.pdf .](https://apihub.primary.com.ar/assets/docs/PrimaryAPI-BO.pdf)
+- Manual oficial A3, específico de la migración de Cauciones: [https://a3mercados.com.ar/docs/cauciones-api-post-trade-a3/ .](https://a3mercados.com.ar/docs/cauciones-api-post-trade-a3/)
 
 ## Soporte
 
 - Contacto operativo: `mpi@primary.com.ar`
+- Issues / sugerencias: vía repositorio GitHub: [https://github.com/matbarofex/a3-ai-skill-cauciones .](https://github.com/matbarofex/a3-ai-skill-cauciones)
 
 ## Licencia
 
 - `Proprietary` (ver frontmatter en `SKILL.md`).
+

@@ -55,7 +55,7 @@ Horarios y throttling: [buenas-practicas.md](references/buenas-practicas.md). HT
 
 ## Autenticación
 
-`POST /AuthToken/AuthToken` — body `{ "nombreUsuario", "password" }`. Header `Authorization: <token>` (24 h). **Máximo 1 solicitud de token por día.**
+`POST /AuthToken/AuthToken` — body `{ "nombreUsuario", "password" }`. Header `Authorization: <token>` (24 h). **Recomendado: 1 solicitud de token por día** (el token dura 24 h).
 
 ## Constantes Cauciones
 
@@ -75,6 +75,7 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 
 ## Gotchas (leer antes de codear)
 
+- **`AuthToken` (buenas prácticas):** el token dura ~24 h → **pedir 1 vez por día**.
 - **`MarketID` no es regla global:** `XMAB` aplica como filtro en `TradeCaptureReport`; en otros métodos puede aparecer `ROFX` aunque la operatoria sea cauciones.
 - **`Account` cambia semántica por endpoint:** en `TradeCaptureReport` es cuenta de registro/comitente; en garantías y márgenes es cuenta de neteo ya que el tipo de información es diferente.
 - **`MT536` sin filtro `Classification=7` como patrón:** para cauciones, filtrar por `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`).
