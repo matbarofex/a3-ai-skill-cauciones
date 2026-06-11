@@ -76,6 +76,10 @@ Este archivo unifica:
 | `Instrument` | MT536 | Nombre del instrumento. | Informativo para reportes. | - |
 | `Quantity` | MT536 | Cantidad de movimiento. | Conciliar con instrucción ejecutada. | - |
 | `ClearingMember` | MT536, márgenes | Nombre del miembro compensador. | Informativo. | - |
+| `Qty` | NewCollateralReport POST (`Details[]`) | Cantidad del detalle. | Enviar como **string** con decimales por punto (ej. `"2412.1192385"`). | - |
+| `ShareholderNumber` | NewCollateralReport POST | Número de cuotapartista. | Requerido si el activo integrado es FCI. | Solo aplica a Fondos Comunes de Inversión. |
+| `ShareholderBusinessName` | NewCollateralReport POST | Razón social del cuotapartista. | Requerido si el activo integrado es FCI. | Solo aplica a FCI. |
+| `ShareholderTIN` | NewCollateralReport POST | CUIT/CUIL del cuotapartista. | Requerido si el activo integrado es FCI. | Solo aplica a FCI. |
 
 ---
 
@@ -105,6 +109,59 @@ Este archivo unifica:
 | `ClearingAccountType` | Reportes varios | Tipo de cuenta. | Informativo / mapeo. | - |
 | `AccountCode` | AccruedFees / reportes | Código de cuenta. | Validar relación con cuenta consultada. | - |
 | `AccountType` | Reportes varios | Tipo de cuenta. | Informativo. | - |
+
+---
+
+## 4) Detalle de cuenta (`AccountDetails`)
+
+Campos planos y reglas de extracción desde estructuras anidadas.
+
+| Campo | Dónde aparece | Definición API | Qué validar en integración | Nota de negocio |
+|---|---|---|---|---|
+| `AccountCode` | AccountDetails | CuentaRegistroCodigo. | Usar como clave de consulta (`accountCode`). | - |
+| `Account` | AccountDetails | CuentaRegistroDescripcion. | Mapear descripción en maestro de comitentes. | - |
+| `CompensationAccountCode` | AccountDetails | CuentaCompensacionCodigo. | Validar relación con cuenta de neteo. | - |
+| `CompensationAccount` | AccountDetails | CuentaCompensacionDescripcion. | Informativo. | - |
+| `NettingAccountCode` | AccountDetails | CuentaNeteo. | Relacionar con `Account` en garantías/márgenes. | Gotcha: en otros endpoints `Account` puede ser neteo. |
+| `PartyId` | AccountDetails | CUIT/CUIL. | Validar formato tributario. | - |
+| `CreationDate` | AccountDetails | FechaAlta. | Normalizar fecha. | - |
+| `ClearingMemberCode` | AccountDetails | MiembroCompensadorCodigo. | Validar contra ALyC. | - |
+| `ClearingMember` | AccountDetails | MiembroCompensadorDescripcion. | Informativo. | - |
+| `AccountType` | AccountDetails | TipoCuentaID. | Mapear catálogo (ver tabla abajo). | Valores: 1 Regular, 2 Global, 4 Sub Cuenta Global, 5 Sub Cuenta Administrativa, 6 Especial de Liquidación, 7 Facturación. |
+| `UnderlyingOwner` | AccountDetails | TieneCotitular. | Tratar como booleano. | - |
+| `AccountRegisterType` | AccountDetails | TipoCuentaRegistroID. | Mapear catálogo (ver tabla abajo). | Campo plano en respuesta, debajo de `UnderlyingOwner`. |
+
+**Extracción desde `PartySubGrp`** (buscar por `PartySubIDSource`):
+
+| PartySubIDSource | Campo negocio | Valores / tipo |
+|---|---|---|
+| 2 | RazonSocial | string |
+| 5 | CuentaRegistroEntidadBursatilCodigo | string |
+| 6 | DomicilioComercial | string |
+| 7 | Telefono | string |
+| 8 | Email | string |
+| 4003 | ClasificacionCuentaNegociacionCnvID | 1 Propio, 2 Terceros |
+| 4005 | EsActivo | boolean |
+| 4009 | CondicionDmaID | 1 Habilitado, 2 Inhabilitado, 3 Suspendido |
+| 4022 | TipoPersonaID | 1 Física, 2 Jurídica |
+| B1 | ClaveBancariaPrimaria | string |
+| B2 | ClaveBancariaSecundaria | string |
+
+**Extracción desde `PosTransType`** (buscar por `PosTransTypeIDSource`):
+
+| PosTransTypeIDSource | Campo negocio | Valores |
+|---|---|---|
+| 1 | MetodoCancelacionID | 1 FIFO, 2 LIFO, 3 No Cancela |
+| 2 | MetodoCancelacionAgroID | 1 Manual + No cancela, 2 Manual + Cancela |
+
+**TipoCuentaRegistroID** (`AccountRegisterType`):
+
+| Valor | Significado |
+|---|---|
+| 1 | Agente Colocador y Distribuidor |
+| 2 | Fondo Común Inversión |
+| 3 | NOR |
+| 4 | Market Maker |
 
 ---
 

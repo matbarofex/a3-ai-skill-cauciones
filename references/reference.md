@@ -41,6 +41,31 @@ Respuesta: `MarketSegmentID: "Caución"`, `SegmentID: "CAUC"`, instrumentos `CAU
 
 ---
 
+## AccountDetails
+
+```
+GET /PreTrade/AccountDetails
+```
+
+Consulta unitaria de una cuenta de registro. **Único parámetro:** `accountCode`. Sin relación específica con el flujo de Cauciones.
+
+| Parámetro | Tipo | Req | Descripción |
+|-----------|------|-----|-------------|
+| accountCode | string | sí | Código de la Cuenta de Registro |
+
+HTTP esperados: **200** (OK), **400** (bad request). También aplican 401/429 — ver [errores-http.md](errores-http.md).
+
+Campos principales de respuesta: `AccountCode`, `Account`, `CompensationAccountCode`, `CompensationAccount`, `NettingAccountCode`, `PartyId`, `CreationDate`, `ClearingMemberCode`, `ClearingMember`, `AccountType`, `UnderlyingOwner`, `AccountRegisterType`.
+
+Estructuras anidadas:
+
+- **`PartySubGrp`**: array de grupos; cada ítem se interpreta por `PartySubIDSource` (ver [diccionario-campos.md](diccionario-campos.md) sección AccountDetails).
+- **`PosTransType`**: array de grupos; cada ítem se interpreta por `PosTransTypeIDSource` (`1` = MetodoCancelacionID, `2` = MetodoCancelacionAgroID).
+
+Throttling: 1 req/s. Ver [buenas-practicas.md](buenas-practicas.md).
+
+---
+
 ## TradeCaptureReport
 
 ```
@@ -156,8 +181,12 @@ Authorization: <token>
 **Consulta estado**
 
 ```
-GET /PosTrade/NewCollateralReport
+GET /PosTrade/NewCollateralReport?CollRptID=<id>
 ```
+
+| Parámetro | Tipo | Req | Descripción |
+|-----------|------|-----|-------------|
+| CollRptID | string | sí | ID de la instrucción (el enviado en POST como `ExternalCollRptID` o el devuelto en respuesta 200) |
 
 Límite conjunto: 2 req/min (POST + GET). Ver [buenas-practicas.md](buenas-practicas.md).
 
@@ -178,7 +207,10 @@ Body JSON (POST) — campos documentados:
 | Details | array | sí (funcional) | Lista de detalles |
 | Details[].Account | string | sí | Cuenta del detalle |
 | Details[].Fund | string | no | Fondo asociado al detalle |
-| Details[].Qty | string | no* | Cantidad del detalle (*en validación API puede comportarse como condicional) |
+| Details[].Qty | string | no* | Cantidad del detalle; admite decimales con punto (ej. `"2412.1192385"`) (*en validación API puede comportarse como condicional) |
+| ShareholderNumber | string | condicional (FCI) | Número de cuotapartista — requerido si el activo es FCI |
+| ShareholderBusinessName | string | condicional (FCI) | Razón social del cuotapartista — requerido si el activo es FCI |
+| ShareholderTIN | string | condicional (FCI) | CUIT/CUIL del cuotapartista — requerido si el activo es FCI |
 
 `Fund`: valores permitidos según doc A3 (ej. `A3 RF Propio`, `A3 RF Tercero`). Ver [glosario.md](glosario.md).
 
@@ -196,6 +228,8 @@ GET /Risk/MarginBalance
 | balanceType | 1 = Consolidado |
 
 Campos: `RequiredMargin`, `IntegratedAsset`, `IntegratedNetBalance`, `FinalMargin`, `Detail[]` por cuenta neteo. En `Detail`, `Reference`: `Cauciones $`, `Cauciones U$S`, `Supletorias`.
+
+**Buena práctica:** no más de **1 req/min** intradía. Ver [buenas-practicas.md](buenas-practicas.md).
 
 ---
 
@@ -232,7 +266,7 @@ GET /PosTrade/DepositaryAccountList
 
 | Parámetro | Req | Notas |
 |-----------|-----|-------|
-| marketAccount | no | `true` devuelve cuentas del mercado; `false`/omitido amplía universo |
+| marketAccount | no | `true` = cuentas del mercado; `false` = solo cuentas del ALYC/agente integrador |
 
 Campos clave de respuesta: `DepositaryAccountCode`, `DepositaryAccount`, `AccountType`, `Entity`, `Currency`, `CollateralAccount`, `Owner`, `TaxId`, `AccountTypeCode`.
 

@@ -80,7 +80,7 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 - **`Account` cambia semántica por endpoint:** en `TradeCaptureReport` es cuenta de registro/comitente; en garantías y márgenes es cuenta de neteo ya que el tipo de información es diferente.
 - **`MT536` sin filtro `Classification=7` como patrón:** para cauciones, filtrar por `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`).
 - **Datos definitivos del día:** usar información consolidada después de procesos de compensación y liquidación (post 17:00). El horario de finalización de los procesos y publicación de información no es fijo y puede variar, según la duración de los procesos (en base al volumen operado) de la CCP.
-- **`MarginBalance` (límite oficial):** `Soporta 1 request cada 5 segundos.`.
+- **`MarginBalance` (frecuencia recomendada):** no más de **1 request por minuto** intradía.
 - **`NewCollateralReport` POST:** usar catálogo de errores de `references/errores-http.md` y loguear status + body completo ante errores operativos.
 
 ## Endpoints
@@ -89,6 +89,7 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 |--------|------|------|
 | AuthToken | POST | `/AuthToken/AuthToken` |
 | SecurityList | GET | `/PreTrade/SecurityList` |
+| AccountDetails | GET | `/PreTrade/AccountDetails` |
 | TradeCaptureReport | GET | `/PosTrade/TradeCaptureReport` |
 | MT506 | GET | `/PosTrade/MT506` |
 | MT536 | GET | `/PosTrade/MT536` |
@@ -136,7 +137,7 @@ Identificar cauciones en respuesta: `SegmentId=CAUC`, `CFICode=RPXXXX`, instrume
 ## NewCollateralReport
 
 - **POST**: ingreso instrucción (`ExternalCollRptID` idempotente, max 20 chars).
-- **GET**: consulta estado (comparte límite 2/min con POST).
+- **GET**: consulta estado por `CollRptID` (comparte límite 2/min con POST).
 - `Side=1` (ingreso) suele usar `OriginType=1`; `Side=2` (egreso) suele usar `OriginType=3`.
 - Estados observados en circuito: `Inicial`, `Confirmado`, `Aprobado Riesgos`, `Procesado`, `Ejecutado`, `Anulado`.
 

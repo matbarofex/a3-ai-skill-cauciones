@@ -53,10 +53,17 @@ Acá se obtiene `InternalInstrumentCode` y `Haircut` (aforo: porcentaje del valo
 
 **Ejemplo:** `examples.md` -> `5. Activos para garantías (CollateralList)`.
 
+### `AccountDetails`
+
+Sirve para consultar el detalle de una cuenta de registro (CUIT, razón social, cuenta de neteo/compensación, tipo de cuenta).  
+No tiene relación específica con Cauciones; cada proveedor lo usa según necesidad de maestro de comitentes.
+
+**Ejemplo:** `examples.md` -> `11. Detalle de cuenta (AccountDetails)`.
+
 ### `DepositaryAccountList`
 
 Sirve para resolver cuentas depositarias disponibles antes de enviar instrucciones de garantías.  
-`marketAccount=true` filtra cuentas del mercado.
+`marketAccount=true` devuelve cuentas del mercado; `marketAccount=false` solo las del ALYC/agente.
 
 **Ejemplo:** `examples.md` -> `10. Cuentas depositarias (DepositaryAccountList)`.
 
@@ -70,11 +77,12 @@ Se usa con idempotencia (`ExternalCollRptID`) y con finalidad (`CollAppIType`) s
 **Ejemplos:**
 
 - `examples.md` -> `6. Ingreso garantía Cauciones $`
+- `examples.md` -> `6b. Ingreso garantía FCI`
 - `examples.md` -> `7. Egreso de garantía Cauciones $`
 
 ### `NewCollateralReport` (GET)
 
-Sirve para consultar estado de la instrucción (proceso asíncrono).  
+Sirve para consultar estado de la instrucción (proceso asíncrono) por parámetro `CollRptID`.  
 Estados observados del ciclo: `Inicial`, `Confirmado`, `Aprobado Riesgos`, `Procesado`, `Ejecutado`, `Anulado`.
 
 **Ejemplos:**

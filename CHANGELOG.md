@@ -8,7 +8,19 @@ Referencias de versión (fuente de verdad):
 
 ## [Unreleased]
 
-Sin cambios publicados todavía.
+### Nuevo endpoint `AccountDetails`
+
+### Ejemplo POST garantía FCI con campos cuotapartista
+
+### Corrección parámetro GET `NewCollateralReport` (`CollRptID`)
+
+### Corrección semántica `DepositaryAccountList` (`marketAccount`)
+
+### `NewCollateralReport` POST: `Qty` como string con decimales
+
+### Campos condicionales FCI en `NewCollateralReport` POST
+
+### Frecuencia recomendada `MarginBalance` (≤ 1 req/min)
 
 ## [1.0.0] - 2026-05-27
 

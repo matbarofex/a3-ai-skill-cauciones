@@ -280,7 +280,7 @@ Content-Type: application/json
   "CompensationAccount": "1123",
   "Observations": "",
   "Details": [
-    { "Account": "1234", "Fund": "A3 RF Tercero", "Qty": 400000 }
+    { "Account": "1234", "Fund": "A3 RF Tercero", "Qty": "400000" }
   ]
 }
 ```
@@ -318,6 +318,35 @@ Authorization: <token>
 }
 ```
 
+## 6b. Ingreso garantía FCI
+
+Campos `Shareholder*` requeridos cuando el activo es FCI. `CollAppIType: 3` = Cauciones $.
+
+```http
+POST /PosTrade/NewCollateralReport
+Authorization: <token>
+Content-Type: application/json
+
+{
+  "InternalInstrumentCode": 2827,
+  "Side": 1,
+  "ExternalCollRptID": "34",
+  "Currency": "ARS",
+  "CollAppIType": 3,
+  "OriginType": 1,
+  "OriginDepositoryAccountCode": 9364,
+  "DestinationDepositoryAccountCode": 19,
+  "CompensationAccount": "1234",
+  "ShareholderNumber": "123891",
+  "ShareholderBusinessName": "Cuotapartista TEST",
+  "ShareholderTIN": "20426250013",
+  "Observations": "",
+  "Details": [
+    { "Account": "55412", "Fund": "FGOT", "Qty": "1000" }
+  ]
+}
+```
+
 ## 7. Egreso de garantía Cauciones $
 
 ```http
@@ -337,7 +366,7 @@ Content-Type: application/json
   "CompensationAccount": "1123",
   "Observations": "",
   "Details": [
-    { "Account": "1234", "Fund": "A3 RF Tercero", "Qty": 100 }
+    { "Account": "1234", "Fund": "A3 RF Tercero", "Qty": "100" }
   ]
 }
 ```
@@ -534,7 +563,58 @@ Authorization: <token>
 }
 ```
 
-## 11. Mapeo sugerido a entidades backoffice
+## 11. Detalle de cuenta (AccountDetails)
+
+```http
+GET /PreTrade/AccountDetails?accountCode=22300
+Authorization: <token>
+```
+
+```json
+{
+  "Status": "OK",
+  "Code": "200",
+  "Value": [
+    {
+      "AccountCode": "22300",
+      "Account": "TEST S.A.",
+      "CompensationAccountCode": "1999",
+      "CompensationAccount": "Compensacion Testing S.A.",
+      "NettingAccountCode": "22300",
+      "PartyId": "30123456782",
+      "CreationDate": "2021-09-30T00:00:00",
+      "ClearingMemberCode": "123",
+      "ClearingMember": "BROKER TEST S.A.",
+      "AccountType": 1,
+      "UnderlyingOwner": true,
+      "AccountRegisterType": 2,
+      "PosTransType": [
+        [
+          { "PosTransTypeID": "", "PosTransTypeIDSource": 1 },
+          { "PosTransTypeID": "1", "PosTransTypeIDSource": 2 }
+        ]
+      ],
+      "PartySubGrp": [
+        [
+          { "PartySubID": "", "PartySubIDSource": 5 },
+          { "PartySubID": "Calle Falsa 123 (1200)", "PartySubIDSource": 6 },
+          { "PartySubID": "+54 (11) 1234-5678", "PartySubIDSource": 7 },
+          { "PartySubID": "TESTING@PRIMARY.COM.AR", "PartySubIDSource": 8 },
+          { "PartySubID": "TEST S A", "PartySubIDSource": 2 },
+          { "PartySubID": 2, "PartySubIDSource": 4009 },
+          { "PartySubID": 2, "PartySubIDSource": 4003 },
+          { "PartySubID": true, "PartySubIDSource": 4005 },
+          { "PartySubID": 2, "PartySubIDSource": 4022 }
+        ]
+      ]
+    }
+  ]
+}
+```
+
+Campos anidados: ver reglas de extracción en [diccionario-campos.md](diccionario-campos.md) sección 4.
+
+## 12. Mapeo sugerido a entidades backoffice
 
 | API | Entidad ERP sugerida |
 |-----|----------------------|
@@ -543,9 +623,10 @@ Authorization: <token>
 | MT506 | Posición garantía por comitente |
 | NewCollateralReport | Orden de garantía (estado ↔ Status API) |
 | MarginBalance | Panel riesgo intradía |
+| AccountDetails | Maestro comitente / detalle de cuenta |
 | AccruedFees | Asiento costos / derechos mercado |
 
-## 12. Errores HTTP
+## 13. Errores HTTP
 
 | HTTP | Acción |
 |------|--------|
@@ -558,7 +639,7 @@ Authorization: <token>
 | Value vacío post 17h | Esperar fin CCP; reconsultar |
 | ExecID sin derivación | Consultar después de cierre rueda |
 
-## 13. Variables de entorno (.env ejemplo)
+## 14. Variables de entorno (.env ejemplo)
 
 ```env
 A3_API_BASE=https://demoapi.anywhereportfolio.com.ar
