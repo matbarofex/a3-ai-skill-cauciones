@@ -96,12 +96,255 @@ Misma estructura con `Side: "F"`, `SecurityID: "CAU-ARS"`, `Currency: "ARS"`.
 
 ### Par tomador + derivación
 
-Dos registros en `Value[]`:
+Tres registros en `Value[]` con **mismo `ExecID`**:
 
-1. `TrdType: 0`, `Side: "G"`, `VenueType: "R"`, `MarketSegmentID: "Rueda Electrónica"`
-2. `TrdType: 49`, `Side: "5"`, `VenueType: "C"`, `MarketSegmentID: "Fuera de Rueda"`, **mismo ExecID**
+1. `TrdType: 0`, `Side: "G"`, `Account: "1234"`, `VenueType: "R"`, `MarketSegmentID: "Rueda Electrónica"` — original interferencia
+2. `TrdType: 49`, `Side: "F"`, `Account: "1234"`, `VenueType: "C"`, `MarketSegmentID: "Fuera de Rueda"` — cancelación (lado opuesto a la madre)
+3. `TrdType: 49`, `Side: "G"`, `Account: "5678"`, `VenueType: "C"`, `MarketSegmentID: "Fuera de Rueda"` — operación definitiva en agente/SD destino
 
-Reconciliación backoffice: agrupar por `ExecID`; operación madre `TrdType=0`, evento derivación `TrdType=49`.
+Reconciliación backoffice: agrupar por `ExecID`; madre `TrdType=0`; eventos `TrdType=49` con `Side` opuesto netean la original; registro con cuenta destino es la operación definitiva.
+
+```json
+[
+  {
+    "TradeID": 32115134,
+    "TradeNumber": 32115134,
+    "TrdRptStatus": "0",
+    "TrdType": 0,
+    "OrderType": 1,
+    "ExecID": 26052112381128988,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "R",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Rueda Electrónica",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 1000000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T12:38:11",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "G", "Account": "1234", "Rate": 30, "StartCash": 1000000, "EndCash": 1000821.92, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  },
+  {
+    "TradeID": 32115135,
+    "TradeNumber": 32115135,
+    "TrdRptStatus": "0",
+    "TrdType": 49,
+    "OrderType": 1,
+    "ExecID": 26052112381128988,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "C",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Fuera de Rueda",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 1000000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T12:45:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "F", "Account": "1234", "Rate": 30, "StartCash": 1000000, "EndCash": 1000821.92, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  },
+  {
+    "TradeID": 32115136,
+    "TradeNumber": 32115136,
+    "TrdRptStatus": "0",
+    "TrdType": 49,
+    "OrderType": 1,
+    "ExecID": 26052112381128988,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "C",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Fuera de Rueda",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 1000000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T12:45:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "G", "Account": "5678", "Rate": 30, "StartCash": 1000000, "EndCash": 1000821.92, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  }
+]
+```
+
+### Asignación (TrdType 3)
+
+Caución tomadora VN 1.000.000 asignada de cuenta A (`1234`) a cuenta B (`5678`). Tres registros en `Value[]` con **mismo `ExecID`**:
+
+1. `TrdType: 0`, `Side: "G"`, `Account: "1234"` — original interferencia
+2. `TrdType: 3`, `Side: "F"`, `Account: "1234"` — cancelación en cuenta origen
+3. `TrdType: 3`, `Side: "G"`, `Account: "5678"` — asignación definitiva
+
+Asignación parcial generaría registros adicionales tipo (3) con distintas cuentas y cantidades. Solo puede realizarse durante la rueda en que se cargó la operación.
+
+```json
+[
+  {
+    "TradeID": 32115134,
+    "TradeNumber": 32115134,
+    "TrdRptStatus": "0",
+    "TrdType": 0,
+    "OrderType": 1,
+    "ExecID": 26052112381128988,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "R",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Rueda Electrónica",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 1000000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T12:38:11",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "G", "Account": "1234", "Rate": 30, "StartCash": 1000000, "EndCash": 1000821.92, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  },
+  {
+    "TradeID": 32115135,
+    "TradeNumber": 32115135,
+    "TrdRptStatus": "0",
+    "TrdType": 3,
+    "OrderType": 1,
+    "ExecID": 26052112381128988,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "C",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Fuera de Rueda",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 1000000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T12:40:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "F", "Account": "1234", "Rate": 30, "StartCash": 1000000, "EndCash": 1000821.92, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  },
+  {
+    "TradeID": 32115136,
+    "TradeNumber": 32115136,
+    "TrdRptStatus": "0",
+    "TrdType": 3,
+    "OrderType": 1,
+    "ExecID": 26052112381128988,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "C",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Fuera de Rueda",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 1000000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T12:40:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "G", "Account": "5678", "Rate": 30, "StartCash": 1000000, "EndCash": 1000821.92, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  }
+]
+```
+
+### Give-up (TrdType 61)
+
+Caución colocadora traspasada del ALyC origen (cuenta `1234`) al ALyC destino (cuenta `9999`). Tres registros en `Value[]` con **mismo `ExecID`**:
+
+1. `TrdType: 0`, `Side: "F"`, `Account: "1234"` — original interferencia
+2. `TrdType: 61`, `Side: "G"`, `Account: "1234"` — cancelación en cuenta origen
+3. `TrdType: 61`, `Side: "F"`, `Account: "9999"` — give-up en cuenta destino
+
+Give-up con cambio de precio: mismo patrón de lados; varía `Rate`/`LastPx` en los registros de cancelación y destino.
+
+```json
+[
+  {
+    "TradeID": 32115200,
+    "TradeNumber": 32115200,
+    "TrdRptStatus": "0",
+    "TrdType": 0,
+    "OrderType": 1,
+    "ExecID": 26052114000000001,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "R",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Rueda Electrónica",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 500000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T14:00:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "F", "Account": "1234", "Rate": 28, "StartCash": 500000, "EndCash": 500383.56, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  },
+  {
+    "TradeID": 32115201,
+    "TradeNumber": 32115201,
+    "TrdRptStatus": "0",
+    "TrdType": 61,
+    "OrderType": 1,
+    "ExecID": 26052114000000001,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "C",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Fuera de Rueda",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 500000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T14:05:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "G", "Account": "1234", "Rate": 28, "StartCash": 500000, "EndCash": 500383.56, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  },
+  {
+    "TradeID": 32115202,
+    "TradeNumber": 32115202,
+    "TrdRptStatus": "0",
+    "TrdType": 61,
+    "OrderType": 1,
+    "ExecID": 26052114000000001,
+    "RootParties": [{ "RootPartyID": "", "RootPartyIDSource": "D", "RootPartyRole": "12" }],
+    "VenueType": "C",
+    "MarketID": "XMAB",
+    "MarketSegmentID": "Fuera de Rueda",
+    "Instrument": [{ "SecurityID": "CAU-ARS", "SecurityIDSource": "H", "CFICode": "RPXXXX" }],
+    "LastQty": 500000,
+    "LastPx": 1,
+    "Currency": "ARS",
+    "SettlCurrency": "Pesos",
+    "TradeDate": "2026-05-21",
+    "TransactTime": "2026-05-21T14:05:00",
+    "SettlType": "B",
+    "SettlDate": "2026-05-22",
+    "TrdCapRptSideGrp": [{ "Side": "F", "Account": "9999", "Rate": 28, "StartCash": 500000, "EndCash": 500383.56, "AggressorIndicator": "N" }],
+    "SegmentId": "CAUC"
+  }
+]
+```
 
 ## 3. Derechos de mercado (AccruedFees)
 
@@ -619,7 +862,8 @@ Campos anidados: ver reglas de extracción en [diccionario-campos.md](diccionari
 | API | Entidad ERP sugerida |
 |-----|----------------------|
 | TradeCaptureReport | Boleta / operación monetaria |
-| TrdType 49 + Side 5/6 | Evento de baja / derivación |
+| TrdType 3/49/61 + Side opuesto (G/F) | Cancelación / neteo |
+| TrdType 3/49/61 + Side original | Operación definitiva en cuenta destino |
 | MT506 | Posición garantía por comitente |
 | NewCollateralReport | Orden de garantía (estado ↔ Status API) |
 | MarginBalance | Panel riesgo intradía |

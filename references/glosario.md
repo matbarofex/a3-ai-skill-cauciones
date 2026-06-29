@@ -10,14 +10,14 @@ Definiciones operativas para integradores de backoffice. El agente debe consulta
 | **Tomador** | `Side=G` | Parte que toma fondos prestados y entrega activos en garantía, obligándose a devolver el capital más intereses al vencimiento. |
 | **Colocador** | `Side=F` | Parte que coloca fondos (presta dinero) a cambio de una tasa de interés pactada (TNA en `Rate`). |
 | **Interferencia de ofertas** | `TrdType=0` | Operación originada por el cruce de ofertas en el libro de la rueda electrónica (concertación estándar en mercado). |
-| **Derivación** | `TrdType=49`, mismo `ExecID` | Operación complementaria registrada Fuera de Rueda, vinculada a la operación original por el mismo `ExecID`, para canalizar la liquidación a través de otro Agente Liquidador (p. ej. vía sociedad depositaria). Por ejemplo, ALyC AA opera una colocadora para la cuenta 11 y luego deriva a una Sociedad Depositaria por lo que la operación original colocadora en cuenta 11 se da de baja por medio de la operación de baja colocador. |
-| **Baja Tomador / Baja Colocador** | `Side=5` / `Side=6` | Lado de la operación de derivación, de asignación o de corrección que revierte el efecto de la original: si la madre fue tomador (`G`), la derivada lleva baja tomador (`5`); si fue colocador (`F`), baja colocador (`6`). |
-| **Asignación** | `TrdType=3` | Modificación posterior de la cuenta asignada a una operación ya concertada. |
-| **Give-up** | `TrdType=61` | Traspaso de una operación concertada por un ALyC a otro ALyC para su compensación/liquidación. |
+| **Operación contraria** | `Side` opuesto (`G`↔`F`), mismo `ExecID` | Cancelación del efecto de la registración original: misma cuenta, instrumento, precio y cantidad, pero con lado opuesto al original. |
+| **Derivación** | `TrdType=49`, mismo `ExecID` | Evento Fuera de Rueda ejecutado por el Mercado cuando la operación debe liquidarse a través de otro Agente o Sociedad Depositaria (p. ej. FCI). Publica operación contraria en la cuenta original y operación definitiva en el agente/SD destino. |
+| **Asignación** | `TrdType=3`, mismo `ExecID` | Modificación posterior de la cuenta titular de una operación ya concertada. Publica operación contraria en cuenta origen y nueva operación con el lado original en cuenta destino. Puede ser parcial a múltiples cuentas; solo durante la rueda en que se cargó la operación. Vía E-Trader si la cuenta es Cuenta a Confirmar. |
+| **Give-up** | `TrdType=61`, mismo `ExecID` | Traspaso de una operación concertada de un ALyC a otro para compensación/liquidación (con o sin cambio de precio). Mismo patrón: operación contraria en origen + operación definitiva en destino. |
 | **Boleta** | `TradeID`, `TradeNumber` | Identificador unívoco de la operación en el mercado/cámara. |
 | **Operación definitiva** | `TrdRptStatus=0` | Estado que tienen las operaciones de caución. |
 | **Operación anulada** | `TrdRptStatus=3` | Estado que tienen las operaciones cuando son anuladas. En cauciones no aplica estado transitorio (`4`). |
-| **ExecID** | Operaciones relacionadas | Identificador de la ejecución en el sistema de negociación. La operación madre y su derivación (u otros eventos ligados) comparten el mismo `ExecID`. |
+| **ExecID** | Operaciones relacionadas | Identificador de la ejecución en el sistema de negociación. La operación madre y sus eventos ligados (asignación, give-up, derivación) comparten el mismo `ExecID`. |
 | **Broken Date** | `SettlType=B` | Valor fijo para indicar que la operación tiene una fecha de liquidación que se publica en el método `SettlDate`. |
 | **Rueda Electrónica / Fuera de Rueda** | `MarketSegmentID`, `VenueType` `R`/`C` | Modalidad de negociación en la que se generó una operación: en pantalla (`R`) o fuera de rueda (`C`), p. ej. derivaciones y ciertos ajustes. |
 | **Rate (TNA)** | `Rate` en `TrdCapRptSideGrp` | Tasa nominal anual expresada en porcentaje que determina el costo/rendimiento de la caución. |

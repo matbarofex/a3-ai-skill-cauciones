@@ -24,9 +24,9 @@ No define un paso a paso obligatorio: cada proveedor implementa los métodos que
 Sirve para obtener operaciones y detectar cuáles corresponden a cauciones (`SegmentId=CAUC`, `CFICode=RPXXXX`, `CAU-`*).  
 Es la base para trazabilidad operativa (`TradeID/TradeNumber`, `ExecID`, `Side`, `Account`, fechas e importes).
 
-Para el caso tomador, permite identificar la operación tomadora en pesos y su vencimiento.
+Además de la interferencia inicial (`TrdType=0`), cubre el ciclo de vida post-concertación: asignación (`TrdType=3`), give-up (`TrdType=61`) y derivación (`TrdType=49`). Estos eventos publican una operación contraria (lado opuesto `G`↔`F`) para netear la original y una operación definitiva en la cuenta/agente destino, todos con el mismo `ExecID`.
 
-**Ejemplos:** `examples.md` -> `2. Operaciones del día (Cauciones)` (`Tomadora`, `Colocadora`, `Par tomador + derivación`).
+**Ejemplos:** `examples.md` -> `2. Operaciones del día (Cauciones)` (`Tomadora`, `Colocadora`, `Par tomador + derivación`, `Asignación`, `Give-up`).
 
 ## Endpoints de costos y riesgo
 

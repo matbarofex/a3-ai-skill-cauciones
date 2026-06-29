@@ -21,7 +21,7 @@ Este archivo unifica:
 | `TradeID` | TradeCaptureReport | Número de boleta. | Persistir como id de operación. | Usar con `ExecID`, `Side`, `Account` para reconciliación. |
 | `TradeNumber` | TradeCaptureReport, AccruedFees | Número de boleta. | Conciliar costos (`AccruedFees`) por `TradeNumber` + `ExecID`. | - |
 | `OrderType` | TradeCaptureReport | Tipo de orden (`1` simple en esta integración). | Aceptar `1` y loguear cualquier valor no esperado. | - |
-| `ExecID` | TradeCaptureReport, AccruedFees | Código de ejecución en motor de negociación. | Mantener trazabilidad por `ExecID`. | Derivaciones/asignaciones/give-up comparten `ExecID` con la madre. |
+| `ExecID` | TradeCaptureReport, AccruedFees | Código de ejecución en motor de negociación. | Mantener trazabilidad por `ExecID`. | Asignaciones, give-ups y derivaciones comparten `ExecID` con la madre. |
 | `RootPartyRole` | TradeCaptureReport | Rol del participante (`12` operador). | Tratar como informativo. | - |
 | `VenueType` | TradeCaptureReport | Tipo de mercado: `R` rueda, `C` fuera de rueda. | Mapear `R`/`C` en catálogo interno. | Útil para distinguir operación original vs derivación/ajuste. |
 | `MarketID` | TradeCaptureReport (filtro y respuesta) | Mercado asociado (`XMAB` en cauciones). | Permitir filtro opcional `XMAB` solo aquí. | Gotcha: en otros endpoints puede venir `ROFX` aunque sea caución. |
@@ -32,13 +32,13 @@ Este archivo unifica:
 | `LastQty` | TradeCaptureReport | Cantidad de operación. | Tratar como monto operado en cauciones. | - |
 | `LastPx` | TradeCaptureReport | Valor fijo (`1`). | Alertar si distinto de `1`. | - |
 | `Currency` | TradeCaptureReport | Moneda de liquidación (`ARS` / `USD`). | Validar consistencia con instrumento (`CAU-ARS` / `CAU-USD`). | - |
-| `TrdType` (`trdType`) | TradeCaptureReport | Tipo de ejecución (`0`,`3`,`49`,`61`). | Mapear y no descartar `3`/`49`/`61`. | Impacta cómo se interpreta el ciclo de vida de la operación. |
+| `TrdType` (`trdType`) | TradeCaptureReport | Tipo de ejecución: `0` interferencia, `3` asignación, `49` derivación, `61` give-up. | Mapear y no descartar `3`/`49`/`61`. | Impacta cómo se interpreta el ciclo de vida de la operación. |
 | `TrdRptStatus` | TradeCaptureReport | Estado de operación (`0` definitiva, `3` anulada). | Procesar `0`; tratar `3` como reversa/anulación. | En cauciones no aplica `4`. |
 | `SettlCurrency` | TradeCaptureReport | Descripción de moneda de liquidación. | Tratar como etiqueta descriptiva. | - |
 | `TradeDate` | TradeCaptureReport | Fecha de operación. | Usar formato fecha interno estándar. | - |
 | `TransactTime` | TradeCaptureReport | Fecha/hora de operación. | Persistir timestamp de auditoría. | - |
 | `SettlType` | TradeCaptureReport | Plazo (`B` Broken Date). | Esperar `B` para cauciones de esta integración. | Fecha efectiva en `SettlDate`. |
-| `Side` | TradeCaptureReport | Lado (`G`,`F`,`5`,`6`). | Mapear los 4 valores. | `5/6` revierten efectos de madre. |
+| `Side` | TradeCaptureReport | Lado: `G` tomador, `F` colocador. | Mapear ambos valores. | En eventos 3/49/61 la cancelación usa el lado opuesto al original. |
 | `Account` | TradeCaptureReport | Cuenta involucrada. | Guardar como cuenta de **registro/comitente** en este endpoint. | Gotcha crítico: en garantías/márgenes cambia a cuenta de neteo. |
 | `AggressorIndicator` | TradeCaptureReport | Orden agresora (`N`/`Y`). | Tratar como informativo. | - |
 | `SegmentID` (`SegmentId`) | TradeCaptureReport | Segmento del instrumento (`CAUC`). | Validar `CAUC` para cauciones. | - |

@@ -87,9 +87,9 @@ GET /PosTrade/TradeCaptureReport
 | Campo | Cauciones |
 |-------|-----------|
 | TradeID / TradeNumber | Número boleta |
-| ExecID | ID negociación; derivación comparte ExecID |
-| TrdType | 0 interferencia, 49 derivación, 3 asignación, 61 give-up |
-| Side | G tomador, F colocador, 5/6 bajas |
+| ExecID | ID negociación; madre y eventos 3/49/61 comparten ExecID |
+| TrdType | 0 interferencia, 3 asignación, 49 derivación, 61 give-up |
+| Side | G tomador, F colocador. En eventos 3/49/61 la cancelación usa el lado opuesto al original |
 | LastQty | Monto operación |
 | LastPx | Siempre 1 |
 | Rate | Tasa % |

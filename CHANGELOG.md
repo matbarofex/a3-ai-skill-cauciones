@@ -8,19 +8,33 @@ Referencias de versión (fuente de verdad):
 
 ## [Unreleased]
 
-### Nuevo endpoint `AccountDetails`
+## [1.1.0] - 2026-06-29
 
-### Ejemplo POST garantía FCI con campos cuotapartista
+### Changed
 
-### Corrección parámetro GET `NewCollateralReport` (`CollRptID`)
+- Cambio de criterio de lados en asignación, give-up y derivación
+- Se deja de documentar Side 5/6 (Baja Tomador/Colocador) en cauciones
+- Cancelación por operación de lado opuesto (G↔F) con mismo ExecID, cuenta, instrumento, precio y cantidad
+- Nuevos ejemplos TrdType 3 (asignación) y 61 (give-up)
+- Corrección ejemplo derivación TrdType 49
 
-### Corrección semántica `DepositaryAccountList` (`marketAccount`)
+### Added
 
-### `NewCollateralReport` POST: `Qty` como string con decimales
+- Nuevo endpoint `AccountDetails`
 
-### Campos condicionales FCI en `NewCollateralReport` POST
+- Ejemplo POST garantía FCI con campos cuotapartista
 
-### Frecuencia recomendada `MarginBalance` (≤ 1 req/min)
+### Fixed
+
+- Corrección parámetro GET `NewCollateralReport` (`CollRptID`)
+
+- Corrección semántica `DepositaryAccountList` (`marketAccount`)
+
+- `NewCollateralReport` POST: `Qty` como string con decimales
+
+- Campos condicionales FCI en `NewCollateralReport` POST
+
+- Frecuencia recomendada `MarginBalance` (≤ 1 req/min)
 
 ## [1.0.0] - 2026-05-27
 
