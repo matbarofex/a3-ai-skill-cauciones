@@ -6,7 +6,8 @@ Skill documental para asistir integraciones de backoffice con la API Post-Trade 
 
 - Identificación de operaciones de caución (`CAUC`, `RPXXXX`, `CAU-ARS`/`CAU-USD`).
 - Lectura de operaciones, márgenes y garantías por endpoint.
-- Instrucciones de garantías (`NewCollateralReport`) y seguimiento de estado.
+- Instrucciones de garantías (`NewCollateralReport`), campos FCI y seguimiento de estado.
+- Detalle de cuenta (`AccountDetails`) por código de registro.
 - Conciliación de movimientos (`MT536`) y stock final (`MT506`).
 - Reglas y gotchas de implementación (semántica de `Account`, uso de `MarketID`, etc.).
 

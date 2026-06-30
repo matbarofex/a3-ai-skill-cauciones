@@ -24,9 +24,9 @@ No define un paso a paso obligatorio: cada proveedor implementa los métodos que
 Sirve para obtener operaciones y detectar cuáles corresponden a cauciones (`SegmentId=CAUC`, `CFICode=RPXXXX`, `CAU-`*).  
 Es la base para trazabilidad operativa (`TradeID/TradeNumber`, `ExecID`, `Side`, `Account`, fechas e importes).
 
-Para el caso tomador, permite identificar la operación tomadora en pesos y su vencimiento.
+Además de la interferencia inicial (`TrdType=0`), cubre el ciclo de vida post-concertación: asignación (`TrdType=3`), give-up (`TrdType=61`) y derivación (`TrdType=49`). Estos eventos publican una operación contraria (lado opuesto `G`↔`F`) para netear la original y una operación definitiva en la cuenta/agente destino, todos con el mismo `ExecID`.
 
-**Ejemplos:** `examples.md` -> `2. Operaciones del día (Cauciones)` (`Tomadora`, `Colocadora`, `Par tomador + derivación`).
+**Ejemplos:** `examples.md` -> `2. Operaciones del día (Cauciones)` (`Tomadora`, `Colocadora`, `Par tomador + derivación`, `Asignación`, `Give-up`).
 
 ## Endpoints de costos y riesgo
 
@@ -53,10 +53,17 @@ Acá se obtiene `InternalInstrumentCode` y `Haircut` (aforo: porcentaje del valo
 
 **Ejemplo:** `examples.md` -> `5. Activos para garantías (CollateralList)`.
 
+### `AccountDetails`
+
+Sirve para consultar el detalle de una cuenta de registro (CUIT, razón social, cuenta de neteo/compensación, tipo de cuenta).  
+No tiene relación específica con Cauciones; cada proveedor lo usa según necesidad de maestro de comitentes.
+
+**Ejemplo:** `examples.md` -> `11. Detalle de cuenta (AccountDetails)`.
+
 ### `DepositaryAccountList`
 
 Sirve para resolver cuentas depositarias disponibles antes de enviar instrucciones de garantías.  
-`marketAccount=true` filtra cuentas del mercado.
+`marketAccount=true` devuelve cuentas del mercado; `marketAccount=false` solo las del ALYC/agente.
 
 **Ejemplo:** `examples.md` -> `10. Cuentas depositarias (DepositaryAccountList)`.
 
@@ -70,11 +77,12 @@ Se usa con idempotencia (`ExternalCollRptID`) y con finalidad (`CollAppIType`) s
 **Ejemplos:**
 
 - `examples.md` -> `6. Ingreso garantía Cauciones $`
+- `examples.md` -> `6b. Ingreso garantía FCI`
 - `examples.md` -> `7. Egreso de garantía Cauciones $`
 
 ### `NewCollateralReport` (GET)
 
-Sirve para consultar estado de la instrucción (proceso asíncrono).  
+Sirve para consultar estado de la instrucción (proceso asíncrono) por parámetro `CollRptID`.  
 Estados observados del ciclo: `Inicial`, `Confirmado`, `Aprobado Riesgos`, `Procesado`, `Ejecutado`, `Anulado`.
 
 **Ejemplos:**

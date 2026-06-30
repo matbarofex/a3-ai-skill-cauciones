@@ -4,7 +4,7 @@ description: Migra o extiende integración BackOffice existente con API Post-Tra
 license: Proprietary
 metadata:
   author: A3 Mercados
-  version: 1.0.0
+  version: 1.1.0
   source-doc: PrimaryAPI-BO.pdf (v1.67)
   contact: mpi@primary.com.ar
 ---
@@ -68,8 +68,8 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 | SegmentId / CFICode (respuesta) | Identificar caución en boleta | `CAUC`, `RPXXXX` |
 | SecurityID | Instrumento | `CAU-ARS`, `CAU-USD` |
 | TrdRptStatus | Operaciones | `0` Definitiva, `3` Anulada |
-| Side | Operaciones | `G`/`F`/`5`/`6` — [glosario.md](references/glosario.md) |
-| TrdType | Operaciones | `0` Interferencia, `49` Derivación |
+| Side | Operaciones | `G` Tomador, `F` Colocador — [glosario.md](references/glosario.md) |
+| TrdType | Operaciones | `0` Interferencia, `3` Asignación, `49` Derivación, `61` Give-up |
 | Reference (garantías) | MT506, MT536, CollateralList, márgenes | `Cauciones $`, `Cauciones U$S`, `Supletorias` |
 | CollAppIType | `NewCollateralReport` | `3` Cauciones $, `4` Cauciones U$S, `24` Supletorias |
 
@@ -80,7 +80,7 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 - **`Account` cambia semántica por endpoint:** en `TradeCaptureReport` es cuenta de registro/comitente; en garantías y márgenes es cuenta de neteo ya que el tipo de información es diferente.
 - **`MT536` sin filtro `Classification=7` como patrón:** para cauciones, filtrar por `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`).
 - **Datos definitivos del día:** usar información consolidada después de procesos de compensación y liquidación (post 17:00). El horario de finalización de los procesos y publicación de información no es fijo y puede variar, según la duración de los procesos (en base al volumen operado) de la CCP.
-- **`MarginBalance` (límite oficial):** `Soporta 1 request cada 5 segundos.`.
+- **`MarginBalance` (frecuencia recomendada):** no más de **1 request por minuto** intradía.
 - **`NewCollateralReport` POST:** usar catálogo de errores de `references/errores-http.md` y loguear status + body completo ante errores operativos.
 
 ## Endpoints
@@ -89,6 +89,7 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 |--------|------|------|
 | AuthToken | POST | `/AuthToken/AuthToken` |
 | SecurityList | GET | `/PreTrade/SecurityList` |
+| AccountDetails | GET | `/PreTrade/AccountDetails` |
 | TradeCaptureReport | GET | `/PosTrade/TradeCaptureReport` |
 | MT506 | GET | `/PosTrade/MT506` |
 | MT536 | GET | `/PosTrade/MT536` |
@@ -124,8 +125,16 @@ Identificar cauciones en respuesta: `SegmentId=CAUC`, `CFICode=RPXXXX`, instrume
 
 - En rueda: transitorias/anuladas (hasta 12/min) si aplica al mercado.
 - Definitivas: 2/día post-CCP (buenas prácticas).
-- Derivación: `TrdType=49`, mismo `ExecID` que madre (`TrdType=0`).
+- Interferencia (`TrdType=0`): sin cambios respecto a futuros/opciones/TIVA.
 - `Account` en boleta = cuenta de registro/comitente.
+
+### Eventos posteriores (asignación, give-up, derivación)
+
+Asignación (`TrdType=3`), give-up (`TrdType=61`) y derivación (`TrdType=49`) modifican una operación ya concertada. Todos los registros ligados comparten el mismo `ExecID` que la madre (`TrdType=0`).
+
+Para cancelar el efecto de la registración original, la API publica una operación de **lado opuesto** (`G`↔`F`) con la misma `Account`, instrumento, `LastQty`, `Rate` y `ExecID`. Luego publica la operación definitiva con el `TrdType` del evento y la cuenta/agente destino.
+
+Ejemplos: [examples.md](references/examples.md) → `Asignación`, `Give-up`, `Par tomador + derivación`.
 
 ## MT536 (movimientos de garantías)
 
@@ -136,7 +145,7 @@ Identificar cauciones en respuesta: `SegmentId=CAUC`, `CFICode=RPXXXX`, instrume
 ## NewCollateralReport
 
 - **POST**: ingreso instrucción (`ExternalCollRptID` idempotente, max 20 chars).
-- **GET**: consulta estado (comparte límite 2/min con POST).
+- **GET**: consulta estado por `CollRptID` (comparte límite 2/min con POST).
 - `Side=1` (ingreso) suele usar `OriginType=1`; `Side=2` (egreso) suele usar `OriginType=3`.
 - Estados observados en circuito: `Inicial`, `Confirmado`, `Aprobado Riesgos`, `Procesado`, `Ejecutado`, `Anulado`.
 
@@ -146,7 +155,7 @@ Identificar cauciones en respuesta: `SegmentId=CAUC`, `CFICode=RPXXXX`, instrume
 2. Respetar throttling → manejar 429 con backoff.
 3. GET: solo esperar HTTP 200, 400, 401, 429 (ver [errores-http.md](references/errores-http.md)).
 4. POST `NewCollateralReport`: usar catálogo de errores documentado en [errores-http.md](references/errores-http.md).
-5. Reconciliación operaciones: `TradeID` + `Account` (registro) + `Side`; derivaciones por `ExecID`.
+5. Reconciliación operaciones: agrupar por `ExecID`; identificar madre (`TrdType=0`) y eventos `3`/`49`/`61`; netear pares mismo `Account` + `ExecID` con `Side` opuesto (`G`/`F`).
 
 ## Archivos
 

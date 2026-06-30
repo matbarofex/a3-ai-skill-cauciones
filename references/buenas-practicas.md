@@ -44,7 +44,8 @@ Implementar: backoff exponencial + jitter; no reintentar en bucle tight.
 | **DepositaryAccountList** | Consultar bajo demanda o cache diario | 1 / s |
 | **Fee** | 1 vez por día (cambios ~mensuales) | 1 / s |
 | **AccruedFees** | 1 vez por día, post proceso diario | 1 / s |
-| **MarginBalance** | *No figura en PDF de buenas prácticas* — usar con moderación intradía; confirmar límite con Primary | — |
+| **MarginBalance** | **≤ 1 req/min** intradía | 2 / s |
+| **AccountDetails** | Consultar bajo demanda (detalle de cuenta por `accountCode`) | 1 / s |
 
 ## Estados de NewCollateralReport
 
@@ -57,7 +58,7 @@ Recomendación: al consultar estado, espaciar polling (por ejemplo cada 30-60 s)
 ```
 10:00  AuthToken (si no hay token del día)
 10:05  SecurityList + CollateralList + Fee (cache)
-10:00–17:00  TradeCaptureReport (≤12/min) + MT506 (≤3/min) + MarginBalance (espaciado)
+10:00–17:00  TradeCaptureReport (≤12/min) + MT506 (≤3/min) + MarginBalance (≤1/min)
 17:00+  Esperar CCP
 Post-CCP  TradeCaptureReport definitivas (2/día) + MT536 + MarginRequirementReport + AccruedFees
 ```

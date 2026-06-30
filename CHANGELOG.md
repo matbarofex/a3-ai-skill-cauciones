@@ -8,7 +8,33 @@ Referencias de versión (fuente de verdad):
 
 ## [Unreleased]
 
-Sin cambios publicados todavía.
+## [1.1.0] - 2026-06-29
+
+### Changed
+
+- Cambio de criterio de lados en asignación, give-up y derivación
+- Se deja de documentar Side 5/6 (Baja Tomador/Colocador) en cauciones
+- Cancelación por operación de lado opuesto (G↔F) con mismo ExecID, cuenta, instrumento, precio y cantidad
+- Nuevos ejemplos TrdType 3 (asignación) y 61 (give-up)
+- Corrección ejemplo derivación TrdType 49
+
+### Added
+
+- Nuevo endpoint `AccountDetails`
+
+- Ejemplo POST garantía FCI con campos cuotapartista
+
+### Fixed
+
+- Corrección parámetro GET `NewCollateralReport` (`CollRptID`)
+
+- Corrección semántica `DepositaryAccountList` (`marketAccount`)
+
+- `NewCollateralReport` POST: `Qty` como string con decimales
+
+- Campos condicionales FCI en `NewCollateralReport` POST
+
+- Frecuencia recomendada `MarginBalance` (≤ 1 req/min)
 
 ## [1.0.0] - 2026-05-27
 

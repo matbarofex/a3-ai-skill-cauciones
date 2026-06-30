@@ -21,7 +21,7 @@ Este archivo unifica:
 | `TradeID` | TradeCaptureReport | Número de boleta. | Persistir como id de operación. | Usar con `ExecID`, `Side`, `Account` para reconciliación. |
 | `TradeNumber` | TradeCaptureReport, AccruedFees | Número de boleta. | Conciliar costos (`AccruedFees`) por `TradeNumber` + `ExecID`. | - |
 | `OrderType` | TradeCaptureReport | Tipo de orden (`1` simple en esta integración). | Aceptar `1` y loguear cualquier valor no esperado. | - |
-| `ExecID` | TradeCaptureReport, AccruedFees | Código de ejecución en motor de negociación. | Mantener trazabilidad por `ExecID`. | Derivaciones/asignaciones/give-up comparten `ExecID` con la madre. |
+| `ExecID` | TradeCaptureReport, AccruedFees | Código de ejecución en motor de negociación. | Mantener trazabilidad por `ExecID`. | Asignaciones, give-ups y derivaciones comparten `ExecID` con la madre. |
 | `RootPartyRole` | TradeCaptureReport | Rol del participante (`12` operador). | Tratar como informativo. | - |
 | `VenueType` | TradeCaptureReport | Tipo de mercado: `R` rueda, `C` fuera de rueda. | Mapear `R`/`C` en catálogo interno. | Útil para distinguir operación original vs derivación/ajuste. |
 | `MarketID` | TradeCaptureReport (filtro y respuesta) | Mercado asociado (`XMAB` en cauciones). | Permitir filtro opcional `XMAB` solo aquí. | Gotcha: en otros endpoints puede venir `ROFX` aunque sea caución. |
@@ -32,13 +32,13 @@ Este archivo unifica:
 | `LastQty` | TradeCaptureReport | Cantidad de operación. | Tratar como monto operado en cauciones. | - |
 | `LastPx` | TradeCaptureReport | Valor fijo (`1`). | Alertar si distinto de `1`. | - |
 | `Currency` | TradeCaptureReport | Moneda de liquidación (`ARS` / `USD`). | Validar consistencia con instrumento (`CAU-ARS` / `CAU-USD`). | - |
-| `TrdType` (`trdType`) | TradeCaptureReport | Tipo de ejecución (`0`,`3`,`49`,`61`). | Mapear y no descartar `3`/`49`/`61`. | Impacta cómo se interpreta el ciclo de vida de la operación. |
+| `TrdType` (`trdType`) | TradeCaptureReport | Tipo de ejecución: `0` interferencia, `3` asignación, `49` derivación, `61` give-up. | Mapear y no descartar `3`/`49`/`61`. | Impacta cómo se interpreta el ciclo de vida de la operación. |
 | `TrdRptStatus` | TradeCaptureReport | Estado de operación (`0` definitiva, `3` anulada). | Procesar `0`; tratar `3` como reversa/anulación. | En cauciones no aplica `4`. |
 | `SettlCurrency` | TradeCaptureReport | Descripción de moneda de liquidación. | Tratar como etiqueta descriptiva. | - |
 | `TradeDate` | TradeCaptureReport | Fecha de operación. | Usar formato fecha interno estándar. | - |
 | `TransactTime` | TradeCaptureReport | Fecha/hora de operación. | Persistir timestamp de auditoría. | - |
 | `SettlType` | TradeCaptureReport | Plazo (`B` Broken Date). | Esperar `B` para cauciones de esta integración. | Fecha efectiva en `SettlDate`. |
-| `Side` | TradeCaptureReport | Lado (`G`,`F`,`5`,`6`). | Mapear los 4 valores. | `5/6` revierten efectos de madre. |
+| `Side` | TradeCaptureReport | Lado: `G` tomador, `F` colocador. | Mapear ambos valores. | En eventos 3/49/61 la cancelación usa el lado opuesto al original. |
 | `Account` | TradeCaptureReport | Cuenta involucrada. | Guardar como cuenta de **registro/comitente** en este endpoint. | Gotcha crítico: en garantías/márgenes cambia a cuenta de neteo. |
 | `AggressorIndicator` | TradeCaptureReport | Orden agresora (`N`/`Y`). | Tratar como informativo. | - |
 | `SegmentID` (`SegmentId`) | TradeCaptureReport | Segmento del instrumento (`CAUC`). | Validar `CAUC` para cauciones. | - |
@@ -76,6 +76,10 @@ Este archivo unifica:
 | `Instrument` | MT536 | Nombre del instrumento. | Informativo para reportes. | - |
 | `Quantity` | MT536 | Cantidad de movimiento. | Conciliar con instrucción ejecutada. | - |
 | `ClearingMember` | MT536, márgenes | Nombre del miembro compensador. | Informativo. | - |
+| `Qty` | NewCollateralReport POST (`Details[]`) | Cantidad del detalle. | Enviar como **string** con decimales por punto (ej. `"2412.1192385"`). | - |
+| `ShareholderNumber` | NewCollateralReport POST | Número de cuotapartista. | Requerido si el activo integrado es FCI. | Solo aplica a Fondos Comunes de Inversión. |
+| `ShareholderBusinessName` | NewCollateralReport POST | Razón social del cuotapartista. | Requerido si el activo integrado es FCI. | Solo aplica a FCI. |
+| `ShareholderTIN` | NewCollateralReport POST | CUIT/CUIL del cuotapartista. | Requerido si el activo integrado es FCI. | Solo aplica a FCI. |
 
 ---
 
@@ -105,6 +109,59 @@ Este archivo unifica:
 | `ClearingAccountType` | Reportes varios | Tipo de cuenta. | Informativo / mapeo. | - |
 | `AccountCode` | AccruedFees / reportes | Código de cuenta. | Validar relación con cuenta consultada. | - |
 | `AccountType` | Reportes varios | Tipo de cuenta. | Informativo. | - |
+
+---
+
+## 4) Detalle de cuenta (`AccountDetails`)
+
+Campos planos y reglas de extracción desde estructuras anidadas.
+
+| Campo | Dónde aparece | Definición API | Qué validar en integración | Nota de negocio |
+|---|---|---|---|---|
+| `AccountCode` | AccountDetails | CuentaRegistroCodigo. | Usar como clave de consulta (`accountCode`). | - |
+| `Account` | AccountDetails | CuentaRegistroDescripcion. | Mapear descripción en maestro de comitentes. | - |
+| `CompensationAccountCode` | AccountDetails | CuentaCompensacionCodigo. | Validar relación con cuenta de neteo. | - |
+| `CompensationAccount` | AccountDetails | CuentaCompensacionDescripcion. | Informativo. | - |
+| `NettingAccountCode` | AccountDetails | CuentaNeteo. | Relacionar con `Account` en garantías/márgenes. | Gotcha: en otros endpoints `Account` puede ser neteo. |
+| `PartyId` | AccountDetails | CUIT/CUIL. | Validar formato tributario. | - |
+| `CreationDate` | AccountDetails | FechaAlta. | Normalizar fecha. | - |
+| `ClearingMemberCode` | AccountDetails | MiembroCompensadorCodigo. | Validar contra ALyC. | - |
+| `ClearingMember` | AccountDetails | MiembroCompensadorDescripcion. | Informativo. | - |
+| `AccountType` | AccountDetails | TipoCuentaID. | Mapear catálogo (ver tabla abajo). | Valores: 1 Regular, 2 Global, 4 Sub Cuenta Global, 5 Sub Cuenta Administrativa, 6 Especial de Liquidación, 7 Facturación. |
+| `UnderlyingOwner` | AccountDetails | TieneCotitular. | Tratar como booleano. | - |
+| `AccountRegisterType` | AccountDetails | TipoCuentaRegistroID. | Mapear catálogo (ver tabla abajo). | Campo plano en respuesta, debajo de `UnderlyingOwner`. |
+
+**Extracción desde `PartySubGrp`** (buscar por `PartySubIDSource`):
+
+| PartySubIDSource | Campo negocio | Valores / tipo |
+|---|---|---|
+| 2 | RazonSocial | string |
+| 5 | CuentaRegistroEntidadBursatilCodigo | string |
+| 6 | DomicilioComercial | string |
+| 7 | Telefono | string |
+| 8 | Email | string |
+| 4003 | ClasificacionCuentaNegociacionCnvID | 1 Propio, 2 Terceros |
+| 4005 | EsActivo | boolean |
+| 4009 | CondicionDmaID | 1 Habilitado, 2 Inhabilitado, 3 Suspendido |
+| 4022 | TipoPersonaID | 1 Física, 2 Jurídica |
+| B1 | ClaveBancariaPrimaria | string |
+| B2 | ClaveBancariaSecundaria | string |
+
+**Extracción desde `PosTransType`** (buscar por `PosTransTypeIDSource`):
+
+| PosTransTypeIDSource | Campo negocio | Valores |
+|---|---|---|
+| 1 | MetodoCancelacionID | 1 FIFO, 2 LIFO, 3 No Cancela |
+| 2 | MetodoCancelacionAgroID | 1 Manual + No cancela, 2 Manual + Cancela |
+
+**TipoCuentaRegistroID** (`AccountRegisterType`):
+
+| Valor | Significado |
+|---|---|
+| 1 | Agente Colocador y Distribuidor |
+| 2 | Fondo Común Inversión |
+| 3 | NOR |
+| 4 | Market Maker |
 
 ---
 
