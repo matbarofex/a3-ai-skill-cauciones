@@ -94,6 +94,59 @@ GET .../TradeCaptureReport?DateFrom=20260521&DateTo=20260521&MarketID=XMAB&segme
 
 Misma estructura con `Side: "F"`, `SecurityID: "CAU-ARS"`, `Currency: "ARS"`.
 
+### Tomadora dólar cable (Side G)
+
+```json
+{
+  "TradeID": 12345678,
+  "TradeNumber": 12345678,
+  "TrdRptStatus": "0",
+  "TrdType": 0,
+  "OrderType": 1,
+  "ExecID": 26100211355148736,
+  "RootParties": [
+    {
+      "RootPartyID": "",
+      "RootPartyIDSource": "D",
+      "RootPartyRole": "12"
+    }
+  ],
+  "VenueType": "R",
+  "MarketID": "XMAB",
+  "MarketSegmentID": "Rueda Electrónica",
+  "Instrument": [
+    {
+      "SecurityID": "CAU-CCL",
+      "SecurityIDSource": "H",
+      "CFICode": "RPXXXX"
+    }
+  ],
+  "LastQty": 1200000,
+  "LastPx": 1,
+  "Currency": "USD C",
+  "SettlCurrency": "Dólar Cable",
+  "TradeDate": "2026-10-02",
+  "TransactTime": "2026-10-02T11:35:51",
+  "SettlType": "B",
+  "SettlDate": "2026-10-07",
+  "TrdCapRptSideGrp": [
+    {
+      "Side": "G",
+      "Account": "1234",
+      "Rate": 1,
+      "StartCash": 1200000,
+      "EndCash": 1200164.38,
+      "AggressorIndicator": "N"
+    }
+  ],
+  "SegmentId": "CAUC"
+}
+```
+
+### Colocadora dólar cable (Side F)
+
+Misma estructura con `Side: "F"`, `SecurityID: "CAU-CCL"`, `Currency: "USD C"`, `SettlCurrency: "Dólar Cable"`.
+
 ### Par tomador + derivación
 
 Tres registros en `Value[]` con **mismo `ExecID`**:
@@ -457,6 +510,34 @@ Authorization: <token>
           ]
         }
       ]
+    },
+    {
+      "ClearingMemberCode": "123",
+      "ClearingMember": "TEST ALYC",
+      "Date": "2026-04-29",
+      "ProductGroup": "Cauciones CCL",
+      "ProductGroupCurrencyQuotation": 1200.48,
+      "ProductGroupCurrencyTotal": -100013700.0,
+      "ProductGroupCurrency": "Dólar Cable",
+      "Accounts": [
+        {
+          "CompensationAccount": "TEST ALYC",
+          "CompensationAccountCode": "1123",
+          "SubAccounts": [
+            {
+              "NettingAccount": "Cuenta de prueba2",
+              "NettingAccountCode": "4321",
+              "References": [
+                {
+                  "Reference": "Cauciones CCL",
+                  "Currency": "Pesos",
+                  "Margin": -120064446576.0
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
@@ -528,7 +609,7 @@ Content-Type: application/json
 }
 ```
 
-`CollAppIType: 4` para Cauciones U$S.
+`CollAppIType: 4` para Cauciones U$S. `CollAppIType: 26` para Cauciones CCL.
 
 ### Estado de instrucción (GET) — ingreso
 

@@ -26,7 +26,7 @@ Es la base para trazabilidad operativa (`TradeID/TradeNumber`, `ExecID`, `Side`,
 
 Además de la interferencia inicial (`TrdType=0`), cubre el ciclo de vida post-concertación: asignación (`TrdType=3`), give-up (`TrdType=61`) y derivación (`TrdType=49`). Estos eventos publican una operación contraria (lado opuesto `G`↔`F`) para netear la original y una operación definitiva en la cuenta/agente destino, todos con el mismo `ExecID`.
 
-**Ejemplos:** `examples.md` -> `2. Operaciones del día (Cauciones)` (`Tomadora`, `Colocadora`, `Par tomador + derivación`, `Asignación`, `Give-up`).
+**Ejemplos:** `examples.md` -> `2. Operaciones del día (Cauciones)` (`Tomadora`, `Colocadora`, `Tomadora dólar cable`, `Colocadora dólar cable`, `Par tomador + derivación`, `Asignación`, `Give-up`).
 
 ## Endpoints de costos y riesgo
 
@@ -40,7 +40,7 @@ Funcionalmente se usa para conciliación económica por operación/ejecución.
 ### `MarginRequirementReport`
 
 Sirve para ver requerimientos de márgenes por posición completa de cuenta, no por trade individual.  
-El análisis se hace por finalidad (`Reference`), por ejemplo `Cauciones $` o `Cauciones U$S`.
+El análisis se hace por finalidad (`Reference`), por ejemplo `Cauciones $`, `Cauciones U$S` o `Cauciones CCL`.
 
 **Ejemplo:** `examples.md` -> `4. Requerimientos de márgenes (MarginRequirementReport)`.
 
@@ -72,7 +72,7 @@ Sirve para resolver cuentas depositarias disponibles antes de enviar instruccion
 ### `NewCollateralReport` (POST)
 
 Sirve para alta de instrucciones de ingreso (`Side=1`) o egreso (`Side=2`) de activos en garantía.  
-Se usa con idempotencia (`ExternalCollRptID`) y con finalidad (`CollAppIType`) según cauciones pesos/dólares/supletorias.
+Se usa con idempotencia (`ExternalCollRptID`) y con finalidad (`CollAppIType`) según cauciones pesos/dólares/dólar cable/supletorias.
 
 **Ejemplos:**
 

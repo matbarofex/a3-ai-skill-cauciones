@@ -8,6 +8,13 @@ Referencias de versión (fuente de verdad):
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-06
+
+### Added
+
+- Caución dólar cable: instrumento `CAU-CCL`, moneda `USD C` / `Dólar Cable`, finalidad `Cauciones CCL` (`CollAppIType` 26), grupo `Cauciones CCL` y producto `Caución CCL`
+- Ejemplos de boleta tomadora y colocadora CCL, y bloque de márgenes con `ProductGroupCurrency` `Dólar Cable`
+
 ## [1.1.0] - 2026-06-29
 
 ### Changed

@@ -4,7 +4,7 @@ description: Migra o extiende integración BackOffice existente con API Post-Tra
 license: Proprietary
 metadata:
   author: A3 Mercados
-  version: 1.1.0
+  version: 1.2.0
   source-doc: PrimaryAPI-BO.pdf (v1.67)
   contact: mpi@primary.com.ar
 ---
@@ -66,19 +66,20 @@ Nota: para advertencias críticas de implementación ver sección **Gotchas (lee
 | MarketID (consulta) | Solo `TradeCaptureReport` (opcional) | `XMAB` |
 | segmentID (consulta) | Solo `TradeCaptureReport` (opcional) | `CAUC` |
 | SegmentId / CFICode (respuesta) | Identificar caución en boleta | `CAUC`, `RPXXXX` |
-| SecurityID | Instrumento | `CAU-ARS`, `CAU-USD` |
+| SecurityID | Instrumento | `CAU-ARS`, `CAU-USD`, `CAU-CCL` |
 | TrdRptStatus | Operaciones | `0` Definitiva, `3` Anulada |
 | Side | Operaciones | `G` Tomador, `F` Colocador — [glosario.md](references/glosario.md) |
 | TrdType | Operaciones | `0` Interferencia, `3` Asignación, `49` Derivación, `61` Give-up |
-| Reference (garantías) | MT506, MT536, CollateralList, márgenes | `Cauciones $`, `Cauciones U$S`, `Supletorias` |
-| CollAppIType | `NewCollateralReport` | `3` Cauciones $, `4` Cauciones U$S, `24` Supletorias |
+| Currency / SettlCurrency | Boleta `CAU-CCL` | `USD C` / `Dólar Cable` |
+| Reference (garantías) | MT506, MT536, CollateralList, márgenes | `Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias` |
+| CollAppIType | `NewCollateralReport` | `3` Cauciones $, `4` Cauciones U$S, `26` Cauciones CCL, `24` Supletorias |
 
 ## Gotchas (leer antes de codear)
 
 - **`AuthToken` (buenas prácticas):** el token dura ~24 h → **pedir 1 vez por día**.
 - **`MarketID` no es regla global:** `XMAB` aplica como filtro en `TradeCaptureReport`; en otros métodos puede aparecer `ROFX` aunque la operatoria sea cauciones.
 - **`Account` cambia semántica por endpoint:** en `TradeCaptureReport` es cuenta de registro/comitente; en garantías y márgenes es cuenta de neteo ya que el tipo de información es diferente.
-- **`MT536` sin filtro `Classification=7` como patrón:** para cauciones, filtrar por `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`).
+- **`MT536` sin filtro `Classification=7` como patrón:** para cauciones, filtrar por `Reference` (`Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`).
 - **Datos definitivos del día:** usar información consolidada después de procesos de compensación y liquidación (post 17:00). El horario de finalización de los procesos y publicación de información no es fijo y puede variar, según la duración de los procesos (en base al volumen operado) de la CCP.
 - **`MarginBalance` (frecuencia recomendada):** no más de **1 request por minuto** intradía.
 - **`NewCollateralReport` POST:** usar catálogo de errores de `references/errores-http.md` y loguear status + body completo ante errores operativos.
@@ -138,7 +139,7 @@ Ejemplos: [examples.md](references/examples.md) → `Asignación`, `Give-up`, `P
 
 ## MT536 (movimientos de garantías)
 
-**Recomendado:** solo `dateFrom`, `dateTo` y `alyc`. Filtrar en el ERP por `Reference`: `Cauciones $`, `Cauciones U$S`, `Supletorias`.
+**Recomendado:** solo `dateFrom`, `dateTo` y `alyc`. Filtrar en el ERP por `Reference`: `Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`.
 
 **No recomendado:** `Classification=7` (existe en el manual; cada proveedor puede usar otro criterio, pero no es el patrón habitual).
 
