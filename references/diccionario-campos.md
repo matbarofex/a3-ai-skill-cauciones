@@ -26,15 +26,15 @@ Este archivo unifica:
 | `VenueType` | TradeCaptureReport | Tipo de mercado: `R` rueda, `C` fuera de rueda. | Mapear `R`/`C` en catálogo interno. | Útil para distinguir operación original vs derivación/ajuste. |
 | `MarketID` | TradeCaptureReport (filtro y respuesta) | Mercado asociado (`XMAB` en cauciones). | Permitir filtro opcional `XMAB` solo aquí. | Gotcha: en otros endpoints puede venir `ROFX` aunque sea caución. |
 | `MarketSegmentID` | TradeCaptureReport | Segmento de negociación (`Rueda Electrónica` / `Fuera de Rueda`). | Mapear ambos valores de texto. | - |
-| `SecurityID` | TradeCaptureReport | Sigla de instrumento. | Filtrar cauciones por `CAU-ARS`/`CAU-USD`. | - |
+| `SecurityID` | TradeCaptureReport | Sigla de instrumento. | Filtrar cauciones por `CAU-ARS`/`CAU-USD`/`CAU-CCL`. | - |
 | `SecurityIDSource` | TradeCaptureReport | Fuente de sigla (`H` clearing house). | Tratar como informativo. | - |
 | `CFICode` | TradeCaptureReport | Código ISO 10962 (`RPXXXX` caución). | Validar `RPXXXX` para identificar cauciones. | - |
 | `LastQty` | TradeCaptureReport | Cantidad de operación. | Tratar como monto operado en cauciones. | - |
 | `LastPx` | TradeCaptureReport | Valor fijo (`1`). | Alertar si distinto de `1`. | - |
-| `Currency` | TradeCaptureReport | Moneda de liquidación (`ARS` / `USD`). | Validar consistencia con instrumento (`CAU-ARS` / `CAU-USD`). | - |
+| `Currency` | TradeCaptureReport | Moneda de liquidación (`ARS` / `USD` / `USD C`). | Validar consistencia con instrumento (`CAU-ARS` / `CAU-USD` / `CAU-CCL` → `USD C`). | - |
 | `TrdType` (`trdType`) | TradeCaptureReport | Tipo de ejecución: `0` interferencia, `3` asignación, `49` derivación, `61` give-up. | Mapear y no descartar `3`/`49`/`61`. | Impacta cómo se interpreta el ciclo de vida de la operación. |
 | `TrdRptStatus` | TradeCaptureReport | Estado de operación (`0` definitiva, `3` anulada). | Procesar `0`; tratar `3` como reversa/anulación. | En cauciones no aplica `4`. |
-| `SettlCurrency` | TradeCaptureReport | Descripción de moneda de liquidación. | Tratar como etiqueta descriptiva. | - |
+| `SettlCurrency` | TradeCaptureReport | Descripción de moneda de liquidación. | Tratar como etiqueta descriptiva. | `CAU-CCL`: `Dólar Cable`. |
 | `TradeDate` | TradeCaptureReport | Fecha de operación. | Usar formato fecha interno estándar. | - |
 | `TransactTime` | TradeCaptureReport | Fecha/hora de operación. | Persistir timestamp de auditoría. | - |
 | `SettlType` | TradeCaptureReport | Plazo (`B` Broken Date). | Esperar `B` para cauciones de esta integración. | Fecha efectiva en `SettlDate`. |
@@ -53,7 +53,7 @@ Este archivo unifica:
 
 | Campo | Dónde aparece | Definición API | Qué validar en integración | Nota de negocio |
 |---|---|---|---|---|
-| `Reference` | MT506, MT536, MarginRequirementReport, CollateralList | Tipo de garantía/concepto (`Cauciones $`, `Cauciones U$S`, `Supletorias`, etc.). | Filtrar por finalidades de cauciones en ERP. | Es la clave práctica para separar finalidades. |
+| `Reference` | MT506, MT536, MarginRequirementReport, CollateralList | Tipo de garantía/concepto (`Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`, etc.). | Filtrar por finalidades de cauciones en ERP. | Es la clave práctica para separar finalidades. |
 | `Asset` | MT506, CollateralList | Activo involucrado. | Validar disponibilidad del activo en maestro interno. | - |
 | `Party` | MT506 | Cuentas `Compensación//Neteo`. | Parsear estructura compuesta y validar cuentas. | - |
 | `Amount` | MT506, MT536 | Monto débito/crédito valorizado. | Conciliar valorización contra cantidad/precio/aforo. | - |
@@ -88,10 +88,10 @@ Este archivo unifica:
 | Campo | Dónde aparece | Definición API | Qué validar en integración | Nota de negocio |
 |---|---|---|---|---|
 | `Date` | MarginRequirementReport, AccruedFees | Fecha de registro. | Normalizar formato y zona horaria interna. | - |
-| `ProductGroup` | MarginRequirementReport | Grupo de producto. | Mapear grupo para reportes internos. | - |
+| `ProductGroup` | MarginRequirementReport | Grupo de producto (`Cauciones $`, `Cauciones USD`, `Cauciones CCL`). | Mapear grupo para reportes internos. | - |
 | `ProductGroupCurrencyQuotation` | MarginRequirementReport | Cotización de moneda del grupo. | Usar en valorización/controles de conversión. | - |
 | `ProductGroupCurrencyTotal` | MarginRequirementReport | Total de márgenes en moneda de grupo. | Verificar signo y consistencia con `Margin`. | - |
-| `ProductGroupCurrency` | MarginRequirementReport | Moneda del grupo (`Pesos` / `Dólar MEP`). | Mapear catálogo de monedas de negocio. | - |
+| `ProductGroupCurrency` | MarginRequirementReport | Moneda del grupo (`Pesos` / `Dólar MEP` / `Dólar Cable`). | Mapear catálogo de monedas de negocio. | En CCL, `References[].Currency` y `Margin` siguen en pesos, igual que U$S. |
 | `CompensationAccount` | MarginRequirementReport, NewCollateralReport, MT536 | Cuenta de compensación. | Validar relación con netting/registro antes de POST. | - |
 | `CompensationAccountCode` | MarginRequirementReport | Código de cuenta compensación. | Mapeo interno de cuentas de compensación. | - |
 | `NettingAccount` | MarginRequirementReport, MT536 | Cuenta de neteo. | Validar relación 1:1 esperada con cuenta de registro. | - |

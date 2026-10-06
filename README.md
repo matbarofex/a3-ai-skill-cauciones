@@ -4,7 +4,7 @@ Skill documental para asistir integraciones de backoffice con la API Post-Trade 
 
 ## Qué cubre
 
-- Identificación de operaciones de caución (`CAUC`, `RPXXXX`, `CAU-ARS`/`CAU-USD`).
+- Identificación de operaciones de caución (`CAUC`, `RPXXXX`, `CAU-ARS`/`CAU-USD`/`CAU-CCL`).
 - Lectura de operaciones, márgenes y garantías por endpoint.
 - Instrucciones de garantías (`NewCollateralReport`), campos FCI y seguimiento de estado.
 - Detalle de cuenta (`AccountDetails`) por código de registro.

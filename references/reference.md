@@ -6,7 +6,7 @@ Envelope éxito: `{ "Status", "Code", "Value" }`. HTTP GET: 200, 400, 401, 429 �
 
 ### `Reference` — garantías (cauciones)
 
-Valores habituales en MT506, MT536, CollateralList, márgenes: **`Cauciones $`**, **`Cauciones U$S`**, **`Supletorias`**.
+Valores habituales en MT506, MT536, CollateralList, márgenes: **`Cauciones $`**, **`Cauciones U$S`**, **`Cauciones CCL`**, **`Supletorias`**.
 
 ---
 
@@ -35,9 +35,9 @@ GET /PreTrade/SecurityList
 | MarketID | sí | `XMAB` |
 | SecurityExchange | no | `XMAB` |
 | SecurityType | no | `TD` (Time Deposit / caución en ejemplos) |
-| SecurityGroup | no | ej. `Caución Pesos`, `Caución Dólares` |
+| SecurityGroup | no | ej. `Caución Pesos`, `Caución Dólares`, `Caución CCL` |
 
-Respuesta: `MarketSegmentID: "Caución"`, `SegmentID: "CAUC"`, instrumentos `CAU-ARS`, `CAU-USD`, `CFICode: RPXXXX`.
+Respuesta: `MarketSegmentID: "Caución"`, `SegmentID: "CAUC"`, instrumentos `CAU-ARS`, `CAU-USD`, `CAU-CCL`, `CFICode: RPXXXX`. Producto cable: `Caución CCL`.
 
 ---
 
@@ -98,7 +98,7 @@ GET /PosTrade/TradeCaptureReport
 | SegmentId | `CAUC` — discriminar caución si la consulta es solo por fechas |
 | MarketID (respuesta) | En boleta de caución suele ser `XMAB`; en otros métodos el mismo campo puede venir `ROFX` |
 | Account | Cuenta de **registro/comitente** (no neteo) |
-| Currency | `ARS`, `USD` (MEP en SettlCurrency) |
+| Currency | `ARS`, `USD` (MEP en SettlCurrency), `USD C` (`CAU-CCL`, `SettlCurrency` `Dólar Cable`) |
 
 ---
 
@@ -117,7 +117,7 @@ GET /PosTrade/MT506
 | Format | no | `json` (default), `swift` |
 | PageNumber, PageSize | no | Paginación |
 
-Campos clave: `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`), `Asset`, `SECV`, `SHAI`, `MRKT`, `Party` (formato `margen//neteo`).
+Campos clave: `Reference` (`Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`), `Asset`, `SECV`, `SHAI`, `MRKT`, `Party` (formato `margen//neteo`).
 
 ---
 
@@ -127,7 +127,7 @@ Campos clave: `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`), `Asse
 GET /PosTrade/MT536
 ```
 
-**Recomendado:** solo `dateFrom`, `dateTo` y `alyc`. Traer todos los movimientos del día y filtrar en el ERP por `Reference`: `Cauciones $`, `Cauciones U$S`, `Supletorias`.
+**Recomendado:** solo `dateFrom`, `dateTo` y `alyc`. Traer todos los movimientos del día y filtrar en el ERP por `Reference`: `Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`.
 
 | Parámetro | Req | Notas |
 |-----------|-----|-------|
@@ -149,7 +149,7 @@ GET /PosTrade/CollateralList?date=YYYYMMDD
 
 | date | sí |
 
-Devuelve: `InternalInstrumentCode`, `Asset`, `Price`, `Haircut`, `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`, etc.).
+Devuelve: `InternalInstrumentCode`, `Asset`, `Price`, `Haircut`, `Reference` (`Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`, etc.).
 
 ---
 
@@ -164,7 +164,7 @@ GET /PosTrade/MarginRequirementReport
 | date | sí |
 | viewDetails | no | `true` desglosa por grupo producto |
 
-Estructura: `ProductGroup` / `References[]` con `Reference` (`Cauciones $`, `Cauciones U$S`, `Supletorias`, …) y `Margin`.
+Estructura: `ProductGroup` / `References[]` con `Reference` (`Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`, …) y `Margin`. Grupo cable: `ProductGroup` `Cauciones CCL`, `ProductGroupCurrency` `Dólar Cable`. En `References[]`, `Currency` y `Margin` siguen el mismo criterio que `Cauciones U$S` (margen en pesos).
 
 ---
 
@@ -198,7 +198,7 @@ Body JSON (POST) — campos documentados:
 | Side | integer | sí | 1 Ingreso, 2 Egreso |
 | ExternalCollRptID | string | sí | ID backoffice / idempotencia (20 chars) |
 | Currency | string | sí | Código de moneda activa |
-| CollAppIType | integer | sí | 3 Cauciones $, 4 Cauciones U$S, 24 Supletorias |
+| CollAppIType | integer | sí | 3 Cauciones $, 4 Cauciones U$S, 26 Cauciones CCL, 24 Supletorias |
 | OriginType | integer | sí | Combinación válida depende de `Side` (en circuito: 1 ingreso, 3 egreso) |
 | OriginDepositoryAccountCode | integer | sí | Cuenta depositaria origen |
 | DestinationDepositoryAccountCode | integer | sí | Cuenta depositaria destino |
@@ -227,7 +227,7 @@ GET /Risk/MarginBalance
 | marketID | 1 = A3 Mercados, 2 = UFEX |
 | balanceType | 1 = Consolidado |
 
-Campos: `RequiredMargin`, `IntegratedAsset`, `IntegratedNetBalance`, `FinalMargin`, `Detail[]` por cuenta neteo. En `Detail`, `Reference`: `Cauciones $`, `Cauciones U$S`, `Supletorias`.
+Campos: `RequiredMargin`, `IntegratedAsset`, `IntegratedNetBalance`, `FinalMargin`, `Detail[]` por cuenta neteo. En `Detail`, `Reference`: `Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`.
 
 **Buena práctica:** no más de **1 req/min** intradía. Ver [buenas-practicas.md](buenas-practicas.md).
 
@@ -254,7 +254,7 @@ GET /PosTrade/AccruedFees
 | date | sí |
 | accountCode, symbol, productAlias, tradingSession, execType, entity | no |
 
-`Trade[]` enlaza `TradeNumber`, `Qty`, `FeeAmt` por operación.
+`Trade[]` enlaza `TradeNumber`, `Qty`, `FeeAmt` por operación. Cable: `Symbol` `CAU-CCL`, `Product` / `ProductAlias` `Caución CCL`.
 
 ---
 

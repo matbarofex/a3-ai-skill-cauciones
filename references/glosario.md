@@ -6,7 +6,7 @@ Definiciones operativas para integradores de backoffice. El agente debe consulta
 
 | Término | Contexto API | Definición |
 |---------|--------------|------------|
-| **Caución** | `CAU-ARS`, `CAU-USD`, `CAUC` | Operación de mutuo con garantía mobiliaria: una parte presta dinero (Colocador) y espera recibir el capital más intereses al vencimiento, y la otra parte toma el dinero (Tomador) dejando activos en garantías, con obligación de devolver capital más intereses al vencimiento. Se negocia en el segmento de cauciones del mercado `XMAB`. |
+| **Caución** | `CAU-ARS`, `CAU-USD`, `CAU-CCL`, `CAUC` | Operación de mutuo con garantía mobiliaria: una parte presta dinero (Colocador) y espera recibir el capital más intereses al vencimiento, y la otra parte toma el dinero (Tomador) dejando activos en garantías, con obligación de devolver capital más intereses al vencimiento. Se negocia en el segmento de cauciones del mercado `XMAB`. `CAU-CCL` liquida en dólar cable (`Currency` `USD C`, `SettlCurrency` `Dólar Cable`). |
 | **Tomador** | `Side=G` | Parte que toma fondos prestados y entrega activos en garantía, obligándose a devolver el capital más intereses al vencimiento. |
 | **Colocador** | `Side=F` | Parte que coloca fondos (presta dinero) a cambio de una tasa de interés pactada (TNA en `Rate`). |
 | **Interferencia de ofertas** | `TrdType=0` | Operación originada por el cruce de ofertas en el libro de la rueda electrónica (concertación estándar en mercado). |
@@ -40,7 +40,7 @@ Definiciones operativas para integradores de backoffice. El agente debe consulta
 
 | Término | Contexto API | Definición |
 |---------|--------------|------------|
-| **Finalidad / Reference** | `Cauciones $`, `Cauciones U$S`, `Supletorias`, `CollAppIType` 3/4/24 | “Caja” de margen y garantías por operatoria (cauciones pesos, cauciones dólares o supletorias). |
+| **Finalidad / Reference** | `Cauciones $`, `Cauciones U$S`, `Cauciones CCL`, `Supletorias`, `CollAppIType` 3/4/26/24 | “Caja” de margen y garantías por operatoria (cauciones pesos, cauciones dólares, cauciones dólar cable o supletorias). |
 | **Aforo** | `SHAI`, `Haircut` en `CollateralList` | Porcentaje del valor de mercado del activo que el CCP acepta para integrar en garantía (p. ej. 90 = se considera el 90 % del valor). |
 | **SECV** | `MT506` | Cantidad nominal o cantidad del activo puesta en garantía. |
 | **MRKT** | `MT506`, `MT536` | Precio de mercado del activo usado para valorizar la garantía. |
